@@ -1,0 +1,391 @@
+/* =====================================================================
+   pages.css — styles that belong to ONE screen only.
+   Grouped by page. If something here starts being reused,
+   move it to components.css.
+   ===================================================================== */
+
+/* =====================================================================
+   Login & Register  (Figma: Authorize / Register - desktop)
+   ===================================================================== */
+.auth-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-20) 0 var(--space-16);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 893px;
+  padding: var(--space-7) var(--space-8) var(--space-6);
+  background: var(--color-surface-ice);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-card);
+}
+
+.auth-card__title {
+  font-size: var(--text-3xl);
+  font-weight: var(--font-semibold);
+  margin-bottom: var(--space-6);
+}
+
+/* Login: e-mail and password side by side. */
+.auth-card__fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-5) var(--space-6);
+}
+
+/* Register: narrower centred column of fields. */
+.auth-card__fields--stacked {
+  max-width: 632px;
+  margin: 0 auto;
+  grid-template-columns: 1fr 1fr;
+}
+
+.auth-card__fields--stacked .field--full {
+  grid-column: 1 / -1;
+}
+
+.auth-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-4);
+  margin-top: var(--space-5);
+}
+
+/* Push the button right even when there's no message on the left. */
+.auth-card__footer .btn {
+  margin-left: auto;
+}
+
+/* "Not yet registered? Sign up" / "Forgot password?" under the card. */
+.auth-switch {
+  margin-top: var(--space-5);
+  text-align: center;
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+@media (max-width: 640px) {
+  .auth-page {
+    padding-top: var(--space-10);
+  }
+
+  .auth-card {
+    border-radius: var(--radius-lg);
+    padding: var(--space-6) var(--space-5);
+  }
+
+  .auth-card__fields--stacked {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =====================================================================
+   Home (patient & doctor) — nav cards + "Looking for…" split section
+   ===================================================================== */
+.home-cards {
+  margin-top: var(--space-16);
+}
+
+.home-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 340px) 1px minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-6);
+  margin-top: var(--space-20);
+}
+
+.home-intro__title {
+  font-size: var(--text-3xl);
+  font-weight: var(--font-bold);
+  line-height: 1.5;
+}
+
+.home-intro__divider {
+  align-self: stretch;
+  min-height: 167px;
+  background: var(--color-primary);
+}
+
+.home-intro__copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+@media (max-width: 760px) {
+  .home-intro {
+    grid-template-columns: 1fr;
+  }
+
+  .home-intro__divider {
+    min-height: 1px;
+    height: 1px;
+  }
+}
+
+/* =====================================================================
+   Doctor profile (patient view): two-column spec table + round button
+   ===================================================================== */
+.doctor-profile {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: var(--space-12);
+}
+
+.spec-table {
+  width: 100%;
+  max-width: 520px;
+  border-collapse: collapse;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+
+.spec-table th,
+.spec-table td {
+  padding: 14px var(--space-5);
+}
+
+.spec-table th {
+  width: 45%;
+  background: var(--color-primary);
+  color: var(--color-surface);
+  font-weight: var(--font-medium);
+  border-top: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.spec-table td {
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-surface-ice);
+}
+
+.spec-table tr:first-child th,
+.spec-table tr:first-child td {
+  border-top: none;
+}
+
+/* 96×96 round "Book Now" button with calendar icon. */
+.book-circle {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+  font-weight: var(--font-medium);
+  transition: transform var(--transition-fast), background-color var(--transition-fast);
+}
+
+.book-circle:hover {
+  transform: translateY(-3px);
+  background: var(--color-primary-hover);
+}
+
+/* =====================================================================
+   Book Now — "Find the doctor for you" search card
+   ===================================================================== */
+.find-card {
+  width: 100%;
+  max-width: 880px;
+  margin: var(--space-10) auto var(--space-12);
+  padding: var(--space-8) var(--space-10) var(--space-7);
+  background: var(--color-surface-ice);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+}
+
+.find-card__title {
+  font-size: var(--text-xl);
+  font-weight: var(--font-semibold);
+  margin-bottom: var(--space-5);
+}
+
+.find-card__body {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+}
+
+.find-card__grid {
+  flex: 1;
+  max-width: 560px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4) var(--space-7);
+}
+
+.find-card__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* Date label above the time pills when no date filter is chosen. */
+.slot-group__date {
+  display: block;
+  margin-bottom: var(--space-1);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  color: var(--color-text-muted);
+  text-align: left;
+}
+
+@media (max-width: 640px) {
+  .find-card {
+    padding: var(--space-6) var(--space-5);
+    border-radius: var(--radius-lg);
+  }
+
+  .find-card__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =====================================================================
+   Doctor › Availability — weekly working-hours form
+   ===================================================================== */
+.availability {
+  margin-top: var(--space-6);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-10) var(--space-16);
+}
+
+.availability__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.availability__heading {
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+}
+
+.availability__hint {
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  max-width: 400px;
+}
+
+/* "From [09:00] To [17:00]" */
+.time-range {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-5);
+  font-size: var(--text-sm);
+}
+
+.time-range label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  white-space: nowrap;
+}
+
+.availability .select {
+  max-width: 260px;
+}
+
+.availability .select--narrow {
+  max-width: 140px;
+}
+
+/* "Saving will publish up to N slots…" line under the form. */
+.availability__summary {
+  margin-top: var(--space-8);
+}
+
+@media (max-width: 860px) {
+  .availability {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =====================================================================
+   Doctor › Calendar — day picker strip + day's slot list
+   ===================================================================== */
+.day-strip {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  padding: var(--space-1) 2px var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.day-strip__day {
+  flex-shrink: 0;
+  min-width: 72px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  text-align: center;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  transition: border-color var(--transition-fast);
+}
+
+.day-strip__day strong {
+  display: block;
+  font-size: var(--text-lg);
+  color: var(--color-text);
+}
+
+.day-strip__day:hover {
+  border-color: var(--color-primary);
+}
+
+.day-strip__day[aria-pressed='true'] {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-surface);
+}
+
+.day-strip__day[aria-pressed='true'] strong {
+  color: var(--color-surface);
+}
+
+/* Little dot under days that have slots. */
+.day-strip__dot {
+  display: block;
+  width: 5px;
+  height: 5px;
+  margin: 2px auto 0;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* Days without slots keep the same height (invisible dot). */
+.day-strip__dot--none {
+  visibility: hidden;
+}
+
+/* Left-aligned content inside a modal (Reschedule: time pills by day). */
+.modal__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+  text-align: left;
+}
