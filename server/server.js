@@ -1,10 +1,16 @@
 
-// Load environment variables from .env
 require("dotenv").config();
 
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const authRoutes = require("./routes/auth");
+
+// Faris's database and appointment routes
+const db = require("./database");
+const { createClinicRouter } = require("./routes/clinic");
+
+// Elister's authentication middleware
+const { requireAuth, requireRole } = require("./middleware/auth");
 
 const app = express();
 
@@ -16,6 +22,13 @@ app.use(cookieParser());
 
 // Connect authentication routes
 app.use("/api/auth", authRoutes);
+
+// Connect clinic appointment routes
+app.use("/api", createClinicRouter({
+    db,
+    requireAuth,
+    requireRole
+}));
 
 // Test route
 app.get("/", (req, res) => {
@@ -36,7 +49,6 @@ app.use((err, req, res, next) => {
             : err.message
     });
 });
-
 
 // Start server
 const PORT = process.env.PORT || 5000;
