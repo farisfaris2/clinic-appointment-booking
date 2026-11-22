@@ -1,0 +1,98 @@
+/* =====================================================================
+   tokens.css — the CareBook design system in one place.
+   Every colour, radius, shadow, font size and spacing value used in the
+   app is defined here, taken from the Figma style guide
+   ("Color Scheme", "Semantic Status Colors", "Typography").
+   Change a value here and it updates everywhere — never hard-code
+   colours or sizes inside component CSS.
+   ===================================================================== */
+
+:root {
+  /* ---------- Brand & neutral colours (Figma: Color Scheme) ---------- */
+  --color-bg: #F8FAFC;            /* page background */
+  --color-surface: #FFFFFF;       /* inputs, tables, modals, dropdowns */
+  --color-surface-ice: #E0F2FE;   /* ice-blue cards (home, doctors, auth, search) */
+  --color-primary: #0284C7;       /* buttons, active links, table headers, footer */
+  --color-primary-hover: #0369A1; /* slightly darker blue for hover/pressed */
+  --color-text: #0F172A;          /* primary dark text */
+  --color-text-muted: #475569;    /* secondary text */
+  --color-text-subtle: #94A3B8;   /* placeholders, role label, hints */
+  --color-border: #CBD5E1;        /* time-slot pills, checkbox outlines */
+  --color-border-subtle: #F1F5F9; /* input borders, table row dividers */
+
+  /* ---------- Semantic status colours (Figma: Semantic Status Colors) ---------- */
+  --color-success: #16A34A;       /* available slot / completed visit */
+  --color-success-bg: #DCFCE7;
+  --color-warning: #D97706;       /* pending / attention */
+  --color-warning-bg: #FEF3C7;
+  --color-danger: #DC2626;        /* cancel, delete, errors */
+  --color-danger-bg: #FEE2E2;
+  --color-booked: #94A3B8;        /* booked / unavailable slot */
+
+  /* ---------- Typography (Figma: Plus Jakarta Sans 400/500/600/700) ---------- */
+  --font-family: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-regular: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  --text-xs: 12px;    /* footer legal links */
+  --text-sm: 14px;    /* captions, table secondary text, links */
+  --text-md: 16px;    /* body text, inputs, buttons */
+  --text-lg: 20px;    /* header nav, card sub-lines */
+  --text-xl: 24px;    /* doctor name on card, search-card title */
+  --text-2xl: 28px;   /* page headings ("Our Doctors", "My Visits") */
+  --text-3xl: 32px;   /* auth titles, home headline */
+  --text-brand: 44px; /* CareBook wordmark in header */
+
+  /* ---------- Spacing scale (multiples of 4) ---------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+
+  /* ---------- Page layout ---------- */
+  --page-gutter: 80px;            /* desktop left/right margin from Figma */
+  --page-max-width: 1440px;       /* content stops stretching on very wide screens */
+  --header-top-padding: 50px;
+
+  /* ---------- Radii ---------- */
+  --radius-sm: 8px;      /* time-slot pills (rectangular variant) */
+  --radius-md: 10px;     /* inputs, selects */
+  --radius-lg: 20px;     /* cards, tables, modals, dropdowns */
+  --radius-xl: 36px;     /* "Find the doctor" search card */
+  --radius-2xl: 40px;    /* auth (login/register) card */
+  --radius-pill: 999px;  /* buttons, chips, time pills */
+
+  /* ---------- Elevation ---------- */
+  --shadow-card: 0 1px 30px 0 rgba(148, 163, 184, 0.15);
+  --shadow-card-hover: 0 8px 32px 0 rgba(2, 132, 199, 0.18);
+  --shadow-popover: 0 1px 30px 0 rgba(148, 163, 184, 0.30);
+
+  /* ---------- Control sizes ---------- */
+  --input-height: 44px;
+  --button-height: 40px;
+  --avatar-size: 65px;
+
+  /* ---------- Motion ---------- */
+  --transition-fast: 0.15s ease;
+}
+
+/* Smaller screens: tighter page margins, slightly smaller display text. */
+@media (max-width: 960px) {
+  :root {
+    --page-gutter: 24px;
+    --header-top-padding: 24px;
+    --text-brand: 32px;
+    --text-3xl: 26px;
+    --text-2xl: 24px;
+  }
+}

@@ -1,0 +1,322 @@
+/* =====================================================================
+   layout.css — the page "skeleton" shared by every screen:
+   app shell, content container, header, profile menu, footer,
+   page heading row and the card grid.
+   Naming: BEM-style  .block, .block__element, .block--modifier
+   ===================================================================== */
+
+/* ---------- App shell: header on top, footer pushed to the bottom ---------- */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-shell__main {
+  flex: 1;
+  padding-bottom: var(--space-20);
+}
+
+/* Centers content and applies the 80px Figma side margins. */
+.container {
+  width: 100%;
+  max-width: var(--page-max-width);
+  margin: 0 auto;
+  padding: 0 var(--page-gutter);
+}
+
+/* =====================================================================
+   Header
+   ===================================================================== */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+  padding-top: var(--header-top-padding);
+  padding-bottom: var(--space-6);
+}
+
+/* Logo + "CareBook" wordmark (also used in the footer, in white). */
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-primary);
+}
+
+.brand__wordmark {
+  font-size: var(--text-brand);
+  font-weight: var(--font-bold);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--color-text);
+}
+
+/* Main navigation: links spread evenly between logo and avatar. */
+.nav {
+  flex: 1;
+  max-width: 640px;
+  display: flex;
+  justify-content: space-evenly;
+  gap: var(--space-6);
+}
+
+.nav__link {
+  font-size: var(--text-lg);
+  color: var(--color-text);
+  white-space: nowrap;
+  text-underline-offset: 6px;
+  text-decoration-thickness: 1.5px;
+  transition: color var(--transition-fast);
+}
+
+.nav__link:hover {
+  color: var(--color-primary);
+}
+
+/* React Router's <NavLink> adds the "active" class for the current page. */
+.nav__link.active {
+  text-decoration-line: underline;
+}
+
+/* ---------- Avatar + profile dropdown ---------- */
+.profile {
+  position: relative;
+}
+
+.avatar {
+  width: var(--avatar-size);
+  height: var(--avatar-size);
+  border-radius: 50%;
+  border: 1.5px solid transparent;
+  background: var(--color-surface-ice);
+  color: var(--color-primary);
+  font-size: var(--text-2xl);
+  font-weight: var(--font-semibold);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color var(--transition-fast);
+}
+
+.avatar[aria-expanded='true'] {
+  border-color: var(--color-primary);
+}
+
+.profile-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 30;
+  min-width: 270px;
+  padding: var(--space-6) var(--space-6) var(--space-7);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-popover);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.profile-menu__identity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  font-weight: var(--font-medium);
+}
+
+.profile-menu__role {
+  font-size: var(--text-sm);
+  font-weight: var(--font-regular);
+  color: var(--color-text-subtle);
+  text-transform: capitalize;
+}
+
+.profile-menu__item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-1) 0;
+  font-size: var(--text-sm);
+  text-align: left;
+  color: var(--color-text);
+}
+
+.profile-menu__item:hover {
+  color: var(--color-primary);
+}
+
+/* Expanded accordion content under "Personal Information" etc. */
+.profile-menu__details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: 0 0 var(--space-2) var(--space-3);
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+/* Chevron rotates when its accordion is open. */
+.chevron {
+  transition: transform var(--transition-fast);
+}
+
+.chevron--open {
+  transform: rotate(180deg);
+}
+
+/* =====================================================================
+   Footer
+   ===================================================================== */
+.footer {
+  min-height: 300px;
+  padding: var(--space-12) 0 var(--space-3);
+  background: var(--color-primary);
+  color: var(--color-surface);
+}
+
+.footer__inner {
+  min-height: 240px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-10);
+}
+
+.footer__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: var(--space-10);
+}
+
+.footer .brand {
+  color: var(--color-surface);
+}
+
+.footer .brand__wordmark {
+  font-size: 29px;
+  color: var(--color-surface);
+}
+
+.footer__contact {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-8);
+}
+
+.footer__contact-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  font-size: 26px;
+  font-weight: var(--font-semibold);
+  line-height: 1.2;
+  font-style: normal;
+}
+
+.footer__contact-list a:hover {
+  text-decoration: underline;
+}
+
+.footer__legal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+  font-size: var(--text-xs);
+}
+
+/* =====================================================================
+   Page heading row: title on the left, optional action on the right
+   (e.g. "Availability" + "Save Availability").
+   ===================================================================== */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin: var(--space-6) 0 var(--space-6);
+}
+
+.page-title {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+}
+
+/* Small grey line under a title ("Select the time, then book"). */
+.page-hint {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-3);
+}
+
+/* "‹ Dr Name Name" back link used as a page title. */
+.back-title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  color: var(--color-text);
+}
+
+.back-title:hover {
+  color: var(--color-primary);
+}
+
+/* Right-aligned row of buttons under a table. */
+.actions-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+}
+
+/* =====================================================================
+   Grid of 384×208 cards (home navigation cards, doctor cards):
+   3 columns on desktop, fewer on narrow screens.
+   ===================================================================== */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--space-7) var(--space-6);
+}
+
+/* =====================================================================
+   Responsive header: logo + avatar on one line, nav underneath.
+   ===================================================================== */
+@media (max-width: 960px) {
+  .header {
+    flex-wrap: wrap;
+    gap: var(--space-4);
+  }
+
+  .nav {
+    order: 3;                  /* move below logo/avatar */
+    flex-basis: 100%;
+    max-width: none;
+    justify-content: flex-start;
+    overflow-x: auto;
+  }
+
+  .nav__link {
+    font-size: var(--text-md);
+  }
+
+  .avatar {
+    --avatar-size: 48px;
+    font-size: var(--text-lg);
+  }
+
+  .footer__contact-list {
+    font-size: var(--text-lg);
+  }
+}

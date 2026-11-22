@@ -1,0 +1,9 @@
+/* =====================================================================
+   index.css — entry point for all styles (imported once in main.jsx).
+   Order matters: tokens first (variables), then generic → specific.
+   ===================================================================== */
+@import './tokens.css';      /* colours, fonts, spacing, radii, shadows */
+@import './base.css';        /* reset + plain HTML element defaults */
+@import './layout.css';      /* app shell, header, footer, page headings */
+@import './components.css';  /* buttons, inputs, cards, tables, modal… */
+@import './pages.css';       /* one-off styles for individual screens */
