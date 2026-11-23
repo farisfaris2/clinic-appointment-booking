@@ -25,6 +25,7 @@ const STATUS_MESSAGES = {
   404: 'We could not find what you were looking for.',
   409: 'That conflicts with an existing booking or time slot.',
   500: 'Something went wrong on the server. Please try again.',
+  502: 'Cannot reach the server. Is the backend running on port 5000?',
 };
 
 /**

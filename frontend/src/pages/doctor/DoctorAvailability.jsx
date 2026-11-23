@@ -5,10 +5,11 @@
    for the coming weeks. This page is the full CRUD for time slots:
 
    - READ    the form opens pre-filled from the doctor's existing slots
-   - CREATE  new slots that fit the schedule      → POST   /api/slots
-   - DELETE  free slots that no longer fit        → DELETE /api/slots/:id
-             (asks for confirmation first — required by the brief)
-   - UPDATE  changing hours and saving = old free slots removed, new added
+   - UPDATE  free slots that no longer fit are MOVED to a new time
+             that is needed                     → PUT    /api/slots/:id
+   - CREATE  extra slots that are still needed  → POST   /api/slots
+   - DELETE  leftover free slots                → DELETE /api/slots/:id
+   Moving or removing slots asks for confirmation first (brief requirement).
 
    Booked visits are never touched: they stay, and new slots that would
    overlap them are skipped. (The backend stores individual slots, not
@@ -154,6 +155,7 @@ function patternFromSlots(slots) {
 /**
  * Compare the new schedule with what exists and decide what to do.
  * Only slots inside the chosen period are considered.
+ * Returns { toMove: [{ slot, target }], toCreate, toDelete, keptBooked }.
  */
 function planChanges(form, existingSlots, slotsWithHistory) {
   const windowEnd = Date.parse(localToIso(addDays(todayKey(), form.weeks * 7), '00:00'));
@@ -164,20 +166,28 @@ function planChanges(form, existingSlots, slotsWithHistory) {
   const wanted = buildSlots(form);
   const wantedKeys = new Set(wanted.map((slot) => slotKey(slot.startAt, slot.endAt)));
 
-  // Remove: free slots that are not in the new schedule. Slots that were
-  // ever booked are kept — the server preserves them for history.
-  const toDelete = inWindow.filter(
-    (slot) =>
-      !wantedKeys.has(slotKey(slot.start_at, slot.end_at)) && slot.available && !slotsWithHistory.has(slot.id),
+  // Free slots that are not part of the new schedule.
+  const unwanted = inWindow.filter((slot) => slot.available && !wantedKeys.has(slotKey(slot.start_at, slot.end_at)));
+  const unwantedIds = new Set(unwanted.map((slot) => slot.id));
+  const kept = inWindow.filter((slot) => !unwantedIds.has(slot.id));
+
+  // New times still needed: wanted, not existing, not clashing with a kept slot.
+  const needed = wanted.filter((slot) => !kept.some((existing) => overlaps(slot, existing)));
+
+  // UPDATE: move unwanted slots onto needed times, oldest first. Slots with
+  // booking history go first, because the server won't let us delete them.
+  const movable = [...unwanted].sort(
+    (a, b) => Number(slotsWithHistory.has(b.id)) - Number(slotsWithHistory.has(a.id)) || a.start_at.localeCompare(b.start_at),
   );
-  const deleteIds = new Set(toDelete.map((slot) => slot.id));
-  const remaining = inWindow.filter((slot) => !deleteIds.has(slot.id));
+  const pairs = Math.min(movable.length, needed.length);
+  const toMove = movable.slice(0, pairs).map((slot, index) => ({ slot, target: needed[index] }));
 
-  // Add: wanted slots that don't exist yet and don't clash with a kept one.
-  const toCreate = wanted.filter((slot) => !remaining.some((existing) => overlaps(slot, existing)));
+  // CREATE whatever is still needed; DELETE leftovers that have no history.
+  const toCreate = needed.slice(pairs);
+  const toDelete = movable.slice(pairs).filter((slot) => !slotsWithHistory.has(slot.id));
 
-  const keptBooked = remaining.filter((slot) => !slot.available).length;
-  return { toCreate, toDelete, keptBooked };
+  const keptBooked = kept.filter((slot) => !slot.available).length;
+  return { toMove, toCreate, toDelete, keptBooked };
 }
 
 /* ---------------------------------------------------------------------
@@ -236,7 +246,7 @@ function AvailabilityForm({ profile, slots, slotsWithHistory, onSaved }) {
   );
   const saving = progress !== null;
 
-  /** Step 1: check the form; ask for confirmation if slots will be removed. */
+  /** Step 1: check the form; ask for confirmation if existing slots change. */
   function handleSaveClick() {
     if (problem) {
       setError(problem);
@@ -244,32 +254,75 @@ function AvailabilityForm({ profile, slots, slotsWithHistory, onSaved }) {
     }
     setError('');
     setResult(null);
-    if (preview.toDelete.length > 0) setPlan(preview);
+    if (preview.toMove.length > 0 || preview.toDelete.length > 0) setPlan(preview);
     else applyPlan(preview);
   }
 
   /** Step 2: send the requests one by one and count the results. */
-  async function applyPlan({ toCreate, toDelete, keptBooked }) {
+  async function applyPlan({ toMove, toCreate: plannedCreates, toDelete: plannedDeletes, keptBooked }) {
     setPlan(null);
-    const summary = { created: 0, removed: 0, keptBooked, failed: 0, firstError: '' };
-    const total = toDelete.length + toCreate.length;
+    // Copies, because failed moves may add to these lists below.
+    const toCreate = [...plannedCreates];
+    const toDelete = [...plannedDeletes];
+    const summary = { moved: 0, created: 0, removed: 0, keptBooked, failed: 0, firstError: '' };
+    const total = toMove.length + toDelete.length + toCreate.length;
     let done = 0;
     setProgress({ done, total });
-
-    const record = async (request, field) => {
-      try {
-        await request();
-        summary[field] += 1;
-      } catch (err) {
-        summary.failed += 1;
-        summary.firstError ||= err.message;
-      }
-      done += 1;
-      setProgress({ done, total });
+    const tick = () => setProgress({ done: (done += 1), total });
+    const fail = (err) => {
+      summary.failed += 1;
+      summary.firstError ||= err.message;
     };
 
-    for (const slot of toDelete) await record(() => slotsApi.remove(slot.id), 'removed');
-    for (const slot of toCreate) await record(() => slotsApi.create({ doctorId: profile.id, ...slot }), 'created');
+    // UPDATE (PUT). A move can briefly clash with a neighbouring slot that
+    // hasn't moved yet (409), so failed moves are retried after the others.
+    let pending = toMove;
+    for (let round = 0; round < 3 && pending.length > 0; round += 1) {
+      const retry = [];
+      for (const move of pending) {
+        try {
+          await slotsApi.update(move.slot.id, move.target);
+          summary.moved += 1;
+          tick();
+        } catch (err) {
+          if (err.status === 409) retry.push(move);
+          else {
+            fail(err);
+            tick();
+          }
+        }
+      }
+      pending = retry;
+    }
+    // Moves that still clash: fall back to delete + create where allowed.
+    for (const move of pending) {
+      if (slotsWithHistory.has(move.slot.id)) fail(new Error('A slot with booking history could not be moved'));
+      else {
+        toDelete.push(move.slot);
+        toCreate.push(move.target);
+      }
+      tick();
+    }
+
+    // DELETE, then CREATE.
+    for (const slot of toDelete) {
+      try {
+        await slotsApi.remove(slot.id);
+        summary.removed += 1;
+      } catch (err) {
+        fail(err);
+      }
+      tick();
+    }
+    for (const slot of toCreate) {
+      try {
+        await slotsApi.create({ doctorId: profile.id, ...slot });
+        summary.created += 1;
+      } catch (err) {
+        fail(err);
+      }
+      tick();
+    }
 
     setProgress(null);
     setResult(summary);
@@ -284,7 +337,7 @@ function AvailabilityForm({ profile, slots, slotsWithHistory, onSaved }) {
       <div className="page-header">
         <h1 className="page-title">Availability</h1>
         <button type="button" className="btn btn--primary" onClick={handleSaveClick} disabled={saving}>
-          {saving ? `Saving ${progress.done}/${progress.total}…` : 'Save Availability'}
+          {saving ? `Saving ${Math.min(progress.done, progress.total)}/${progress.total}…` : 'Save Availability'}
         </button>
       </div>
 
@@ -292,7 +345,7 @@ function AvailabilityForm({ profile, slots, slotsWithHistory, onSaved }) {
       {error && <p className="alert alert--error" role="alert">{error}</p>}
       {result && (
         <p className={`alert ${result.failed ? 'alert--warning' : 'alert--success'}`} role="status">
-          Saved. {result.created} slot{result.created === 1 ? '' : 's'} added, {result.removed} removed
+          Saved. {result.moved} moved, {result.created} added, {result.removed} removed
           {result.keptBooked > 0 && `, ${result.keptBooked} booked kept`}
           {result.failed > 0 && `, ${result.failed} failed (${result.firstError})`}.{' '}
           <Link to="/doctor/calendar" className="link">View calendar</Link>
@@ -385,9 +438,9 @@ function AvailabilityForm({ profile, slots, slotsWithHistory, onSaved }) {
       <p className="page-hint availability__summary" aria-live="polite">
         {problem
           ? problem
-          : preview.toCreate.length === 0 && preview.toDelete.length === 0
+          : preview.toMove.length + preview.toCreate.length + preview.toDelete.length === 0
             ? 'Your published slots already match this schedule.'
-            : `Saving will add ${preview.toCreate.length} and remove ${preview.toDelete.length} free time slot(s) over the next ${form.weeks} week(s).`}
+            : `Saving will move ${preview.toMove.length}, add ${preview.toCreate.length} and remove ${preview.toDelete.length} free time slot(s) over the next ${form.weeks} week(s).`}
       </p>
 
       {/* ---------- Confirm before deleting (brief: delete asks for confirmation) ---------- */}
@@ -403,9 +456,9 @@ function AvailabilityForm({ profile, slots, slotsWithHistory, onSaved }) {
           }
         >
           <p>
-            <strong>{plan.toDelete.length}</strong> free time slot{plan.toDelete.length === 1 ? '' : 's'} no longer
-            fit{plan.toDelete.length === 1 ? 's' : ''} your schedule and will be removed, and{' '}
-            <strong>{plan.toCreate.length}</strong> will be added. Booked visits are not affected.
+            Your free time slots will change: <strong>{plan.toMove.length}</strong> moved to a new time,{' '}
+            <strong>{plan.toCreate.length}</strong> added and <strong>{plan.toDelete.length}</strong> removed.
+            Booked visits are not affected.
           </p>
         </Modal>
       )}
