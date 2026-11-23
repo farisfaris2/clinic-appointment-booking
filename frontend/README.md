@@ -1,16 +1,24 @@
-# React + Vite
+# CareBook: Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite frontend for Clinic Appointment Booking. See the main README for the full setup.
 
-Currently, two official plugins are available:
+## Run
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. npm install
+2. npm run dev — opens at http://localhost:5173 (start the backend on port 5000 first)
+3. npm run lint — checks the code
 
-## React Compiler
+## Structure
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- `src/main.jsx` starts React with the router and the login provider
+- `src/App.jsx` lists all pages by role, with route guards
+- `src/api/` talks to the backend: `client.js` sends every request, `endpoints.js` has one function per backend route
+- `src/context/` and `src/hooks/` hold the logged-in user and shared logic (data loading, pagination)
+- `src/components/` has the layout (header, footer, profile menu), route guards, shared UI pieces and icons
+- `src/pages/` has the login/register, patient and doctor screens
+- `src/styles/` has the design system: `tokens.css` holds the Figma colours, fonts and sizes
 
-## Expanding the ESLint configuration
+## Notes
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- Requests to `/api` are forwarded to the backend by the Vite proxy (`vite.config.js`), so the login cookie works.
+- All data comes from the backend; nothing is hard-coded.
